@@ -14,6 +14,9 @@ from recommenders.models.deeprec.models.sequential.sli_rec import (
     SLI_RECModel as SeqModel,
 )
 from recommenders.models.deeprec.io.sequential_iterator import SequentialIterator
+from app.db import init_db_connection
+import json
+import sqlite3
 
 EPOCHS = 10
 BATCH_SIZE = 400
@@ -82,6 +85,7 @@ class Recommender:
             train_num_ngs=train_num_ngs,
         )
         self.model = self.load_model()
+        self.db = init_db_connection()
 
     def train(self):
         self.model = SeqModel(self.hparams, input_creator, seed=RANDOM_SEED)
@@ -119,5 +123,34 @@ class Recommender:
         ]
         data["prediction"] = predict["prediction"]
         data = data[(data["user_id"] == userId)]
-        result = data[(data["prediction"] > 0.75)].to_dict(orient="records")
+        result = data[(data["prediction"] > 0.5)].to_dict(orient="records")
         return result
+
+    def pre_data(self):
+        meta_name = "meta_Movies_and_TV.json"
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        data_path = os.path.join(current_dir, "..", "resources", "slirec")
+        meta_file = os.path.join(data_path, meta_name)
+        meta_r = open(meta_file, "r")
+        with sqlite3.connect("movies.db") as con:
+            cur = con.cursor()
+            for line in meta_r:
+                line_new = eval(line)
+                cur.execute(
+                    "INSERT INTO movies (asin,data) VALUES (?,?)",
+                    (line_new["asin"], json.dumps(line_new)),
+                )
+            con.commit()
+
+    def get_movies(self, movieId):
+        try:
+            with sqlite3.connect("movies.db") as con:
+                cur = con.cursor()
+                cur.execute(
+                    "select data from movies where asin = ? limit 0,1", (movieId,)
+                )
+                (data,) = cur.fetchone()
+                return data
+        except Exception as e:
+            print(e)
+            return None

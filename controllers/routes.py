@@ -1,10 +1,12 @@
-import os
-from flask import request
-import pandas as pd
+from flask import request, render_template
 import json
 
 
 def registryRouter(app, model):
+
+    @app.route("/", methods=["GET"])
+    def index():
+        return render_template("index.html")
 
     @app.route("/train", methods=["POST"])
     def Audio2Text():
@@ -12,7 +14,16 @@ def registryRouter(app, model):
             model.train()
             return {"status": "success", "data": "ok"}, 200
         except:
-            return {"status": "success", "data": "Could not detect lyrics"}, 400
+            return {"status": "failed", "data": "Could not train"}, 400
+
+    @app.route("/load", methods=["GET"])
+    def pre_data():
+        try:
+            model.pre_data()
+            return {"status": "success", "data": "ok"}, 200
+        except Exception as e:
+            print(e)
+            return {"status": "failed", "data": "Could not load"}, 400
 
     @app.route("/predict", methods=["POST"])
     def recommend():
@@ -22,25 +33,14 @@ def registryRouter(app, model):
             return {"status": "success", "data": data}, 200
         except Exception as e:
             print(e)
-            return {"status": "success", "data": "Something went wrong"}, 400
+            return {"status": "failed", "data": "Something went wrong"}, 400
 
     @app.route("/movies/<movieId>", methods=["GET"])
     def movies(movieId=None):
         try:
-
-            meta_name = "meta_Movies_and_TV.json"
-            current_dir = os.path.dirname(os.path.realpath(__file__))
-            data_path = os.path.join(current_dir, "..", "resources", "slirec")
-            meta_file = os.path.join(data_path, meta_name)
-            meta_r = open(meta_file, "r")
-
-            for line in meta_r:
-                line_new = eval(line)
-                if line_new["asin"] == movieId:
-                    return {"status": "success", "data": line_new}, 200
-
-            return {"status": "filed", "data": "Movie not found"}, 404
+            data = model.get_movies(movieId)
+            return {"status": "success", "data": json.loads(data)}, 200
 
         except Exception as e:
             print(e)
-            return {"status": "filed", "data": "Something went wrong"}, 400
+            return {"status": "failed", "data": "Something went wrong"}, 400
