@@ -24,6 +24,13 @@ $ python -m app
 http://localhost:5000/train
 ```
 
+## Load movies to sqlite
+
+```bash
+http://localhost:5000/load
+```
+
+
 ## Predict
 
 ```bash
