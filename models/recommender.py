@@ -24,7 +24,7 @@ RANDOM_SEED = SEED
 
 data_path = os.path.join("resources", "slirec")
 
-yaml_file = "D:/LEARN/RS/final/models/sli_rec.yaml"
+yaml_file = os.path.join("models", "sli_rec.yaml")
 train_file = os.path.join(data_path, r"train_data")
 valid_file = os.path.join(data_path, r"valid_data")
 test_file = os.path.join(data_path, r"test_data")
@@ -84,7 +84,8 @@ class Recommender:
             need_sample=True,
             train_num_ngs=train_num_ngs,
         )
-        self.model = self.load_model()
+        if os.path.exists(os.path.join(self.hparams.MODEL_DIR, "best_model")):
+            self.model = self.load_model()
         self.db = init_db_connection()
 
     def train(self):
