@@ -8,7 +8,7 @@ def registryRouter(app, model):
     def index():
         return render_template("index.html")
 
-    @app.route("/train", methods=["POST"])
+    @app.route("/train", methods=["GET"])
     def Audio2Text():
         try:
             model.train()
@@ -16,10 +16,19 @@ def registryRouter(app, model):
         except:
             return {"status": "failed", "data": "Could not train"}, 400
 
-    @app.route("/load", methods=["GET"])
+    @app.route("/load-movies", methods=["GET"])
     def pre_data():
         try:
             model.pre_data()
+            return {"status": "success", "data": "ok"}, 200
+        except Exception as e:
+            print(e)
+            return {"status": "failed", "data": "Could not load"}, 400
+
+    @app.route("/prepare", methods=["GET"])
+    def model_pre_predict():
+        try:
+            model.model_pre_predict()
             return {"status": "success", "data": "ok"}, 200
         except Exception as e:
             print(e)

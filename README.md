@@ -9,8 +9,8 @@ Python version 3.8.3
 ```bash
 $ pip install -r requirements.txt
 ```
-
-## Running the app
+# Step by step to run
+## 1 Running the app
 
 ```bash
 # development
@@ -18,21 +18,33 @@ $ python -m app
 
 ```
 
-## Train
+## 2 Train model
 
 ```bash
-http://localhost:5000/train
+GET http://localhost:5000/train
 ```
 
-## Load movies to sqlite
+## 3 Load movies to sqlite
 
 ```bash
-http://localhost:5000/load
+GET http://localhost:5000/load-movies
 ```
 
-
-## Predict
+## 4 Prepare predict scores 
 
 ```bash
-http://localhost:5000/predict
+GET http://localhost:5000/prepare
+```
+
+<b style="color:red;">note *</b>: Steps 1 to 4 are run only when you run the application for the first time
+
+## 5 Predict score by userID
+
+```bash
+POST http://localhost:5000/predict
+content-type: application/json
+
+{
+    "userId": "A268XZJ063VKTW"
+}
 ```
